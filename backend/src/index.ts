@@ -22,6 +22,10 @@ import taskRoutes from "./routes/task.route";
 
 const app = express();
 const BASE_PATH = config.BASE_PATH;
+const isProduction = config.NODE_ENV === "production";
+
+// Render runs the app behind a proxy; required for secure cookies to be set
+app.set("trust proxy", 1);
 
 app.use(express.json());
 
@@ -32,9 +36,10 @@ app.use(
     name: "session",
     keys: [config.SESSION_SECRET],
     maxAge: 24 * 60 * 60 * 1000,
-    secure: config.NODE_ENV === "production",
+    secure: isProduction,
     httpOnly: true,
-    sameSite: "lax",
+    // Frontend and backend are on different domains in production
+    sameSite: isProduction ? "none" : "lax",
   })
 );
 
